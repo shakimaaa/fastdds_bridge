@@ -1,0 +1,35 @@
+// 对应 nav_msgs/msg/Odometry：位姿 + 线/角速度及协方差
+
+module odom_topic_base
+{
+    const unsigned long MAX_FRAME_ID_LEN = 128;
+    const unsigned long COVARIANCE_SIZE = 36;
+
+    @final
+    struct OdomData
+    {
+        // Header
+        string<MAX_FRAME_ID_LEN> frame_id;
+        string<MAX_FRAME_ID_LEN> child_frame_id;
+        unsigned long long timestamp;  // sec*1e9 + nanosec
+
+        // Pose
+        double position_x;
+        double position_y;
+        double position_z;
+        double orientation_x;
+        double orientation_y;
+        double orientation_z;
+        double orientation_w;
+        sequence<double, COVARIANCE_SIZE> pose_covariance;
+
+        // Twist
+        double linear_x;
+        double linear_y;
+        double linear_z;
+        double angular_x;
+        double angular_y;
+        double angular_z;
+        sequence<double, COVARIANCE_SIZE> twist_covariance;
+    };
+};

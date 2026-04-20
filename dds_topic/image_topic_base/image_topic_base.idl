@@ -1,0 +1,14 @@
+module image_topic_base
+{
+    const unsigned long MAX_IMAGE_BYTES = 640*480*5;
+    @final
+    struct ImageData
+    {
+        uint16 height;
+        uint16 width;
+        uint8 encoding;
+        uint32 step;
+
+        uint8 data[MAX_IMAGE_BYTES];
+    };
+};

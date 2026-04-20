@@ -1,0 +1,18 @@
+module imu_topic_base{
+@final  // 标记此类型为 Final，以优化序列化
+    struct IMUData {
+            double orientation_w;
+            double orientation_x;
+            double orientation_y;
+            double orientation_z;
+            double angular_velocity_x;
+            double angular_velocity_y;
+            double angular_velocity_z;
+            double linear_acceleration_x;
+            double linear_acceleration_y;
+            double linear_acceleration_z;
+            double roll;     // Euler angle around x axis
+            double pitch;    // Euler angle around y axis
+            double yaw;      // Euler angle around z axis
+    };
+};

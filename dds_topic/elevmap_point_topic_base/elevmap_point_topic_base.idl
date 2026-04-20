@@ -1,0 +1,30 @@
+// 车体/基座系高程采样点云（与 elevation_mapping_node 的 body_elevation_cloud 对齐）
+// — header.frame_id = base_frame；点仅为 x,y,z（世界栅格在车体系的投影高度），无 intensity
+
+module elevmap_point_topic_base
+{
+    const unsigned long MAX_FRAME_ID_LEN = 128;
+    const unsigned long MAX_LAYER_NAME_LEN = 32;
+
+    /** 展开后最大点数：车体窗口 rows×cols，远小于此；留余量供以后加大窗口 */
+    const unsigned long MAX_POINTS = 131072;
+
+    struct PointXYZ
+    {
+        float x;
+        float y;
+        float z;
+    };
+
+    @final
+    struct ElevMapBodyPointCloud
+    {
+        string<MAX_FRAME_ID_LEN> frame_id;
+        unsigned long long timestamp_ns;
+        /** 与 PointCloud2.is_dense 一致：false 表示存在 nan/inf（当前实现可为 true） */
+        boolean is_dense;
+        /** 高程层名，例如 "inpaint"；无可写空字符串 */
+        string<MAX_LAYER_NAME_LEN> layer_name;
+        sequence<PointXYZ, MAX_POINTS> points;
+    };
+};

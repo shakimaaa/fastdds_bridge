@@ -1,0 +1,14 @@
+module Motor_Command_16
+{
+    @final  // 标记此类型为 Final，以优化序列化
+    struct motor_cmd
+    {
+        float kp[16];                 // 位置环比例系数
+        float kd[16];                 // 阻尼系数
+        float pos[16];                // 目标位置
+        float vel[16];                // 目标速度
+        float torque[16];             // 目标力矩
+        float ff_torque[16];             // 目标力矩
+        uint32 mode[16];              // 控制模式
+    };
+};

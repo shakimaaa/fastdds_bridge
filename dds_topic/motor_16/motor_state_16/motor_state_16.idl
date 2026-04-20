@@ -1,0 +1,16 @@
+module Motor_State_16
+{
+    @final  // 标记此类型为 Final，以优化序列化
+    struct motor_state
+    {
+        uint32 motorId[16];          // 16 个电机的 ID
+        int64 lastSeenTime[16];      // 16 个电机的上次通信时间
+        uint8 status[16];            // 16 个电机的状态
+        float position[16];          // 16 个电机的当前位置
+        float speed[16];             // 16 个电机的速度
+        float current[16];           // 16 个电机的电流
+        float motorTemperature[16];  // 16 个电机的电机温度
+        float mosTemperature[16];    // 16 个电机的 MOS 温度
+        boolean isonline[16];        // 16 个电机的在线状态
+    };
+};

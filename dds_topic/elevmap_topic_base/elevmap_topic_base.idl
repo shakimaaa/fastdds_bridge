@@ -1,0 +1,35 @@
+// 匹配 layers 结构，我们将每一层封装为一个 LayerData
+
+module elevmap_topic_base
+{
+    const unsigned long MAX_FRAME_ID_LEN = 128;
+    const unsigned long MAX_LAYER_NAME_LEN = 32;
+    const unsigned long MAX_CELLS = 40000; // 200 * 200
+    const unsigned long MAX_LAYERS = 4;    // 预留层数：elevation, traversability, variance... 
+
+    struct LayerData {
+        string<MAX_LAYER_NAME_LEN> name;
+        sequence<float, MAX_CELLS> data; // 行优先存储
+    };
+
+    @final
+    struct ElevMapData
+    {
+        // Header
+        string<MAX_FRAME_ID_LEN> frame_id;
+        unsigned long long timestamp;
+
+        // Info
+        double resolution;
+        double length_x;
+        double length_y;
+        unsigned long rows;
+        unsigned long cols;
+
+        // Layers
+        sequence<LayerData, MAX_LAYERS> layers;
+        sequence<string<MAX_LAYER_NAME_LEN>, MAX_LAYERS> basic_layers;
+    };
+};
+
+
