@@ -35,16 +35,6 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
-        Node(
-            package='fastdds_ros2_bridge',  # 包名
-            executable='fastdds_ros2_bridge_imu_node',  # IMU转换节点可执行文件名
-            name='imu_forwarder_node',  # IMU节点名称
-            output='screen',  # 控制台输出日志
-            parameters=[
-                {'debug_output': False}  # 传递给IMU节点的参数
-            ],
-            arguments=['robot', robot_name]  # 传递机器人类型参数
-        ),
         # Node(
         #     package='fastdds_ros2_bridge',  # 包名
         #     executable='fastdds_ros2_bridge_joint_node',  # 关节转换节点可执行文件名

@@ -88,7 +88,7 @@ int main(int argc, char** argv)
     }
     if (in_fd < 0) return 1;
 
-    eprosima::fastdds::ImuWorker w(in_fd, robot_type + "_imu_sim");
+    eprosima::fastdds::ImuWorker w(in_fd, robot_type + "_imu");
     w.run();
     return 0;
 }

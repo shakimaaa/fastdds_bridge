@@ -46,8 +46,9 @@ class TfRobotDateDdsWorker final
     , public SubscriberAppBase_imu
 {
 public:
-    explicit TfRobotDateDdsWorker(int out_fd)
+    explicit TfRobotDateDdsWorker(int out_fd, std::string robot_type)
         : out_fd_(out_fd)
+        , robot_type_(std::move(robot_type))
     {
     }
 
@@ -72,8 +73,8 @@ public:
             std::fprintf(stderr, "INFO: DDS domain %d\n", dds_qos_config.cfg.domain);
         }
 
-        SubscriberAppBase_motor::init_fastdds_sub(dds_qos_config.cfg, "lr_pro_motor_state");
-        SubscriberAppBase_imu::init_fastdds_sub(dds_qos_config.cfg, "imu_lr_pro");
+        SubscriberAppBase_motor::init_fastdds_sub(dds_qos_config.cfg, robot_type_ + "_motor_state");
+        SubscriberAppBase_imu::init_fastdds_sub(dds_qos_config.cfg, robot_type_ + "_imu");
     }
 
     void on_data_available(eprosima::fastdds::dds::DataReader* reader) override
@@ -90,6 +91,7 @@ public:
 
 private:
     int out_fd_;
+    std::string robot_type_;
 
     void process_motor(eprosima::fastdds::dds::DataReader* reader)
     {
@@ -175,24 +177,38 @@ private:
         p.qx = last_valid_data.orientation_x();
         p.qy = last_valid_data.orientation_y();
         p.qz = last_valid_data.orientation_z();
+        p.avx = last_valid_data.angular_velocity_x();
+        p.avy = last_valid_data.angular_velocity_y();
+        p.avz = last_valid_data.angular_velocity_z();
+        p.lax = last_valid_data.linear_acceleration_x();
+        p.lay = last_valid_data.linear_acceleration_y();
+        p.laz = last_valid_data.linear_acceleration_z();
         (void)write_all(out_fd_, &p, sizeof p);
     }
 };
 
 int main(int argc, char** argv)
 {
-    if (argc < 2)
+    std::string robot_type = "lr_pro";
+    int out_fd = -1;
+    for (int i = 1; i < argc - 1; ++i)
     {
-        std::fprintf(stderr, "usage: %s <write_fd>\n", argv[0]);
-        return 1;
+        if (std::string(argv[i]) == "--robot")
+        {
+            robot_type = argv[i + 1];
+        }
+        else if (std::string(argv[i]) == "--fd")
+        {
+            out_fd = std::atoi(argv[i + 1]);
+        }
     }
-    const int out_fd = std::atoi(argv[1]);
     if (out_fd < 0)
     {
+        std::fprintf(stderr, "usage: %s --robot <name> --fd <write_fd>\n", argv[0]);
         return 1;
     }
 
-    TfRobotDateDdsWorker worker(out_fd);
+    TfRobotDateDdsWorker worker(out_fd, robot_type);
     worker.init_dds();
     std::fprintf(stderr, "tf_robot_date_dds_worker: DDS ok, blocking\n");
     for (;;)

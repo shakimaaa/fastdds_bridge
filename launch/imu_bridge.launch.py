@@ -9,7 +9,9 @@ def generate_launch_description():
             name='imu_forwarder_node',  # 节点名称
             output='screen',  # 将日志输出到屏幕
             parameters=[
-                {'debug_output': False}  # 设置参数 debug_output
+                {'debug_output': False},
+                {'enable_forwarding': False},
+                {'forward_hz': 100.0},
             ]
         )
     ])

@@ -22,6 +22,12 @@ struct ImuPacket
     float qx;
     float qy;
     float qz;
+    float avx;
+    float avy;
+    float avz;
+    float lax;
+    float lay;
+    float laz;
 };
 #pragma pack(pop)
 

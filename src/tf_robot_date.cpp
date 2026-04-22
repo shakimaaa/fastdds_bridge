@@ -54,6 +54,7 @@ public:
         , dds_rx_fd_(dds_rx_fd)
     {
         joint_state_publisher_ = this->create_publisher<sensor_msgs::msg::JointState>("/joint_states", 10);
+        imu_publisher_ = this->create_publisher<sensor_msgs::msg::Imu>("/imu_tf/imu", 10);
         tf_broadcaster_ = std::make_unique<tf2_ros::TransformBroadcaster>(this);
 
         can_id_to_motor_name_map_ = {
@@ -104,6 +105,7 @@ private:
     rclcpp::TimerBase::SharedPtr timer_;
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_broadcaster_;
     rclcpp::Publisher<sensor_msgs::msg::JointState>::SharedPtr joint_state_publisher_;
+    rclcpp::Publisher<sensor_msgs::msg::Imu>::SharedPtr imu_publisher_;
 
     std::map<int, std::string> can_id_to_motor_name_map_;
 
@@ -138,12 +140,25 @@ private:
                 {
                     break;
                 }
+
+                sensor_msgs::msg::Imu imu_msg;
+                imu_msg.header.stamp = this->now();
+                imu_msg.header.frame_id = "imu_link";
+                imu_msg.orientation.set__w(p.qw);
+                imu_msg.orientation.set__x(p.qx);
+                imu_msg.orientation.set__y(p.qy);
+                imu_msg.orientation.set__z(p.qz);
+                imu_msg.angular_velocity.set__x(p.avx);
+                imu_msg.angular_velocity.set__y(p.avy);
+                imu_msg.angular_velocity.set__z(p.avz);
+                imu_msg.linear_acceleration.set__x(p.lax);
+                imu_msg.linear_acceleration.set__y(p.lay);
+                imu_msg.linear_acceleration.set__z(p.laz);
+
                 std::lock_guard<std::mutex> lock(imu_mu_);
-                latest_imu_msg_.orientation.set__w(p.qw);
-                latest_imu_msg_.orientation.set__x(p.qx);
-                latest_imu_msg_.orientation.set__y(p.qy);
-                latest_imu_msg_.orientation.set__z(p.qz);
+                latest_imu_msg_ = imu_msg;
                 has_imu_data_ = true;
+                imu_publisher_->publish(imu_msg);
             }
         }
         if (rclcpp::ok())
@@ -205,6 +220,16 @@ int main(int argc, char** argv)
 {
     std::signal(SIGCHLD, SIG_IGN);
 
+    std::string robot_type = "lr_pro";
+    for (int i = 1; i < argc - 1; ++i)
+    {
+        if (std::string(argv[i]) == "robot")
+        {
+            robot_type = argv[i + 1];
+            break;
+        }
+    }
+
     int pipefd[2];
     if (::pipe(pipefd) != 0)
     {
@@ -225,7 +250,8 @@ int main(int argc, char** argv)
         ::close(pipefd[0]);
         char fd_arg[32];
         std::snprintf(fd_arg, sizeof fd_arg, "%d", pipefd[1]);
-        ::execl(worker_exe.c_str(), "tf_robot_date_dds_worker", fd_arg, reinterpret_cast<char*>(0));
+        ::execl(worker_exe.c_str(), "tf_robot_date_dds_worker",
+                "--robot", robot_type.c_str(), "--fd", fd_arg, reinterpret_cast<char*>(0));
         std::perror("execl tf_robot_date_dds_worker");
         _exit(127);
     }
